@@ -1,0 +1,19 @@
+﻿        use PATH_TO_CSFILE
+
+setup-fixture 
+
+setup 
+
+teardown   
+
+
+
+
+
+
+
+ test SendContractToApi_ParsableXml_Sent 
+		mock          IParserFactory setup ParseContract	(any) returns new ContractModel   
+
+	act("string") 
+	mock IMongoRepository verify Publish(any) called once

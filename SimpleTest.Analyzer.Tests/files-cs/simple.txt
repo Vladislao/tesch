@@ -1,0 +1,48 @@
+﻿using System;
+using System.Collections.Generic;
+using Autofac.Extras.Moq;
+using Collector223.ApiConnector;
+using Collector223.Core;
+using Collector223.Core.Exceptions;
+using Collector223.Core.Models;
+using Collector223.Parser;
+using EastpeasyMq;
+using Moq;
+using NUnit.Framework;
+using UpdaterApi.Sender.Models;
+
+namespace Collector223.ApiConnectorTests
+{
+    [TestFixture]
+    public class SenderTests
+    {
+        [TestFixtureSetUp]
+        public void SetUpFixture()
+        {
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+        }
+
+        [Test]
+        public void SendContractToApi_ParsableXml_Sent()
+        {
+            using (var mock = AutoMock.GetLoose())
+            {
+                mock.Mock<IParserFactory>().Setup(factory => factory.ParseContract(It.IsAny<string>())).Returns(() => new ContractModel());
+                
+				var sender = mock.Create<Sender>();
+                sender.SendContractToApi("string");
+
+                mock.Mock<IMongoRepository>().Verify(service => service.Publish(It.IsAny<object>()), Times.Once);
+            }
+        }
+    }
+}
