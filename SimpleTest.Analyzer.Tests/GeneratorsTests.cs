@@ -23,36 +23,36 @@ namespace SimpleTest.Analyzer.Tests
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(file);
-            var wordBlocks = textReader.GetBlocks(formalizedText);
-            var generated = testFunction.Generate(wordBlocks.Last());
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks.Last());
 
             Assert.AreEqual(expected, generated);
         }
 
         [TestMethod]
-        public void Mock_TwoWords_Generated()
+        public void Mock_SimpleInterface_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
             var testFunction = new Mock();
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(file);
-            var wordBlocks = textReader.GetBlocks(formalizedText);
-            var generated = testFunction.Generate(wordBlocks.Last().Lines[1], wordBlocks.Last().Lines[1].Words.First());
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks.Last().Lines[1].Words.First());
 
             Assert.AreEqual("mock.Mock<IParserFactory>()", generated);
         }
 
         [TestMethod]
-        public void Setup_TwoWords_Generated()
+        public void Setup_WithAnyParam_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
             var testFunction = new Setup();
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(file);
-            var wordBlocks = textReader.GetBlocks(formalizedText);
-            var generated = testFunction.Generate(wordBlocks.Last().Lines[1], wordBlocks.Last().Lines[1].Words[2]);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks.Last().Lines[1].Words[2]);
 
             Assert.AreEqual(".Setup(f => f.ParseContract(It.IsAny<object>()))", generated);
         }
@@ -65,24 +65,24 @@ namespace SimpleTest.Analyzer.Tests
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(file);
-            var wordBlocks = textReader.GetBlocks(formalizedText);
-            var generated = testFunction.Generate(wordBlocks.Last().Lines[1], wordBlocks.Last().Lines[1].Words[4]);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks.Last().Lines[1].Words[4]);
 
             Assert.AreEqual(".Returns(() => new ContractModel())", generated);
         }
 
         [TestMethod]
-        public void Act_TwoWords_Generated()
+        public void Act_WithParameter_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
-            var testFunction = new Returns();
+            var testFunction = new Act();
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(file);
-            var wordBlocks = textReader.GetBlocks(formalizedText);
-            var generated = testFunction.Generate(wordBlocks.Last().Lines[1], wordBlocks.Last().Lines[1].Words[4]);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks.Last().Lines[2].Words[0]);
 
-            Assert.AreEqual(".Returns(() => new ContractModel())", generated);
+            Assert.AreEqual("var actor = mock.Create<Sender>();\n\t\t\tactor.SendContractToApi(\"string\")", generated);
         }
     }
 }

@@ -39,7 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Generator.cs" />
+    <Compile Include="BlockGenerators.cs" />
+    <Compile Include="Generator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="InlineGenerators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextReader.cs" />
   </ItemGroup>

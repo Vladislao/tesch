@@ -5,6 +5,11 @@ using System.Text;
 
 namespace SimpleTest.Analyzer
 {
+    public class WordDock
+    {
+        public List<WordBlock> Blocks { get; set; } 
+    }
+
     public class WordBlock
     {
         public string Text { get; set; }
@@ -23,9 +28,19 @@ namespace SimpleTest.Analyzer
     {
         public string Text { get; set; }
 
+        public WordLine Line { get; set; }
+        public WordBlock Block { get; set; }
+        public WordDock Dock { get; set; }
+
         public Word Next { get; set; }
         public Word Previous { get; set; }
 
+        public bool Processed { get; set; }
+
+        /// <summary>
+        /// returns word as function
+        /// </summary>
+        /// <returns></returns>
         public string GetFunction()
         {
             if (string.IsNullOrWhiteSpace(Text))
@@ -67,6 +82,10 @@ namespace SimpleTest.Analyzer
             return result.ToString();
         }
 
+        /// <summary>
+        /// returns parameters for word
+        /// </summary>
+        /// <returns></returns>
         public List<string> GetParams()
         {
             if(string.IsNullOrWhiteSpace(Text))
@@ -82,6 +101,10 @@ namespace SimpleTest.Analyzer
             return inside.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
 
+        /// <summary>
+        /// returns word as value (new obj or val)
+        /// </summary>
+        /// <returns></returns>
         public string GetValue()
         {
             if (string.IsNullOrWhiteSpace(Text))
@@ -94,6 +117,20 @@ namespace SimpleTest.Analyzer
                 default:
                     return Text;
             }
+        }
+
+        /// <summary>
+        /// returns word without parenthesis && lowercase
+        /// </summary>
+        /// <returns></returns>
+        public string GetPlain()
+        {
+            if (string.IsNullOrWhiteSpace(Text))
+                return Text;
+
+            var first = Text.IndexOf('(');
+
+            return first != -1 ? Text.Substring(0, first).ToLowerInvariant() : Text.ToLowerInvariant();
         }
     }
 
@@ -170,12 +207,38 @@ namespace SimpleTest.Analyzer
             return result.ToString().Trim();
         }
 
-        public List<WordBlock> GetBlocks(string text)
+        private void CombineBlock(WordDock dock, string txt)
         {
-            var result = new List<WordBlock>();
-            string txt;
-            List<WordLine> lines;
+            var lines = GetLines(txt);
 
+            var block = new WordBlock
+            {
+                Text = txt,
+                Lines = lines
+            };
+
+            // force deep dependency (helps a lot with inline generators)
+            foreach (var line in lines)
+            {
+                foreach (var word in line.Words)
+                {
+                    word.Line = line;
+                    word.Block = block;
+                    word.Dock = dock;
+                }
+            }
+
+            dock.Blocks.Add(block);
+        }
+
+        public WordDock GetBlocks(string text)
+        {
+            var result = new WordDock
+            {
+                Blocks = new List<WordBlock>()
+            };
+
+            string txt;
             var newline = 0;
             var stringBuilder = new StringBuilder();
 
@@ -185,15 +248,7 @@ namespace SimpleTest.Analyzer
                 {
                     // here we go to the next block
                     txt = stringBuilder.Remove(stringBuilder.Length - 2, 2).ToString();
-                    lines = GetLines(txt);
-
-                    var block = new WordBlock
-                    {
-                        Text = txt,
-                        Lines = lines
-                    };
-
-                    result.Add(block);
+                    CombineBlock(result, txt);
 
                     stringBuilder = new StringBuilder();
                 }
@@ -206,13 +261,7 @@ namespace SimpleTest.Analyzer
             }
 
             txt = stringBuilder.ToString();
-            lines = GetLines(txt);
-            // here we go to the last block
-            result.Add(new WordBlock
-            {
-                Text = txt,
-                Lines = lines
-            });
+            CombineBlock(result, txt);
 
             return result;
         }
@@ -223,10 +272,11 @@ namespace SimpleTest.Analyzer
             var result = new List<WordLine>();
             foreach (var line in lines)
             {
+                var words = GetWords(line);
                 var wordLine = new WordLine
                 {
                     Text = line,
-                    Words = GetWords(line)
+                    Words = words
                 };
                 result.Add(wordLine);
             }
@@ -281,7 +331,7 @@ namespace SimpleTest.Analyzer
                 var wordObj = new Word
                 {
                     Text = word,
-                    Previous = prev
+                    Previous = prev,
                 };
 
                 if (prev != null)

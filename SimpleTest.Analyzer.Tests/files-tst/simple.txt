@@ -1,4 +1,4 @@
-﻿use PATH_TO_CSFILE
+﻿use Sender PATH_TO_CSFILE
 
 setup-fixture
 

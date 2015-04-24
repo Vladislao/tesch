@@ -99,16 +99,16 @@ namespace SimpleTest.Analyzer.Tests
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(brokenFile);
-            var wordBlocks = textReader.GetBlocks(formalizedText);
+            var dock = textReader.GetBlocks(formalizedText);
 
-            Assert.IsNotNull(wordBlocks);
-            Assert.AreEqual(5, wordBlocks.Count);
+            Assert.IsNotNull(dock);
+            Assert.AreEqual(5, dock.Blocks.Count);
 
-            Assert.AreEqual("use PATH_TO_CSFILE", wordBlocks[0].Text);
-            Assert.AreEqual("setup-fixture", wordBlocks[1].Text);
-            Assert.AreEqual("setup", wordBlocks[2].Text);
-            Assert.AreEqual("teardown", wordBlocks[3].Text);
-            Assert.AreEqual("test SendContractToApi_ParsableXml_Sent\n\tmock IParserFactory setup ParseContract(any) returns new ContractModel\n\tact(\"string\")\n\tmock IMongoRepository verify Publish(any) called once", wordBlocks[4].Text);
+            Assert.AreEqual("use PATH_TO_CSFILE", dock.Blocks[0].Text);
+            Assert.AreEqual("setup-fixture", dock.Blocks[1].Text);
+            Assert.AreEqual("setup", dock.Blocks[2].Text);
+            Assert.AreEqual("teardown", dock.Blocks[3].Text);
+            Assert.AreEqual("test SendContractToApi_ParsableXml_Sent\n\tmock IParserFactory setup ParseContract(any) returns new ContractModel\n\tact(\"string\")\n\tmock IMongoRepository verify Publish(any) called once", dock.Blocks[4].Text);
         }
 
         [TestMethod]
