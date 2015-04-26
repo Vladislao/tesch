@@ -1,4 +1,4 @@
-# tesch
+# tesch [![Build Status](https://travis-ci.org/Vladislao/tesch.svg?branch=master)](https://travis-ci.org/Vladislao/tesch)
 simple language to create tests for your C# code
 
 ## todo
