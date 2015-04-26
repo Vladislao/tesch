@@ -11,38 +11,36 @@ using Moq;
 using NUnit.Framework;
 using UpdaterApi.Sender.Models;
 
-namespace Collector223.ApiConnectorTests
+namespace Collector223.ApiConnector.Tests
 {
-    [TestFixture]
-    public class SenderTests
-    {
-        [TestFixtureSetUp]
-        public void SetUpFixture()
-        {
-        }
+	[TestFixture]
+	public class SenderTests
+	{
+		[TestFixtureSetUp]
+		public void SetUpFixture()
+		{
+		}
 
-        [SetUp]
-        public void SetUp()
-        {
-        }
+		[SetUp]
+		public void SetUp()
+		{
+		}
 
-        [TearDown]
-        public void TearDown()
-        {
-        }
+		[TearDown]
+		public void TearDown()
+		{
+		}
 
-        [Test]
-        public void SendContractToApi_ParsableXml_Sent()
-        {
-            using (var mock = AutoMock.GetLoose())
-            {
-                mock.Mock<IParserFactory>().Setup(factory => factory.ParseContract(It.IsAny<string>())).Returns(() => new ContractModel());
-                
-				var sender = mock.Create<Sender>();
-                sender.SendContractToApi("string");
-
-                mock.Mock<IMongoRepository>().Verify(service => service.Publish(It.IsAny<object>()), Times.Once);
-            }
-        }
-    }
+		[Test]
+		public void SendContractToApi_ParsableXml_Sent()
+		{
+			using (var mock = AutoMock.GetLoose())
+			{
+				mock.Mock<IParserFactory>().Setup(f => f.ParseContract(It.IsAny<object>())).Returns(() => new ContractModel());
+				var actor = mock.Create<Sender>();
+				actor.SendContractToApi("string");
+				mock.Mock<IMongoRepository>().Verify(f => f.Publish(It.IsAny<object>()), Times.Once);
+			}
+		}
+	}
 }

@@ -13,6 +13,18 @@ namespace SimpleTest.Analyzer.Tests
         {
             
         }
+
+        [TestMethod]
+        public void Generator_Simple_Generated()
+        {
+            var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
+            var expected = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-cs", "simple.txt")).Replace("\r", string.Empty);
+
+            var testFunction = new Generator();
+            var generated = testFunction.Generate(file);
+
+            Assert.AreEqual(expected, generated);
+        }
         
         [TestMethod]
         public void TextReader_Body_Generated()
@@ -55,6 +67,21 @@ namespace SimpleTest.Analyzer.Tests
             var formalizedText = textReader.FormalizeText(file);
             var dock = textReader.GetBlocks(formalizedText);
             var generated = testFunction.Generate(dock.Blocks[1]);
+
+            Assert.AreEqual(expected, generated);
+        }
+
+        [TestMethod]
+        public void Use_Body_Generated()
+        {
+            var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
+            var expected = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "generators", "use-generated.txt")).Replace("\r", string.Empty);
+            var testFunction = new UseBlock();
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText(file);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks[0]);
 
             Assert.AreEqual(expected, generated);
         }

@@ -1,4 +1,5 @@
-﻿		[TestFixtureSetUp]
+﻿
+		[TestFixtureSetUp]
 		public void SetUpFixture()
 		{
 		}

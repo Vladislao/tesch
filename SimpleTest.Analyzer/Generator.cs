@@ -38,6 +38,7 @@ namespace SimpleTest.Analyzer
                 else
                     throw new NotImplementedException();
             }
+            result.Append("\t}\n}\n");
 
             return result.ToString();
         }

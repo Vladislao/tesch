@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -15,7 +17,9 @@ namespace SimpleTest.Analyzer
         {
             Add(TestBlock.Name, new TestBlock());
             Add(TearDownBlock.Name, new TearDownBlock());
+            Add(SetUpFixtureBlock.Name, new SetUpFixtureBlock());
             Add(SetUpBlock.Name, new SetUpBlock());
+            Add(UseBlock.Name, new UseBlock());
         }
     }
 
@@ -47,6 +51,43 @@ namespace SimpleTest.Analyzer
         }
     }
 
+    public class UseBlock : IBlockGenerator
+    {
+        public const string Name = "use";
+
+        //usings
+        //
+        //namespace Collector223.ApiConnector.Tests
+        //{
+        //    [TestFixture]
+        //    public class SenderTests
+        //    {
+
+        public string Generate(WordBlock block)
+        {
+            var result = new StringBuilder();
+
+            var classpath = block.Lines[0].Words[2].Text;
+            var lines = File.ReadAllLines(classpath);
+
+            var classspace = string.Empty;
+            foreach (var line in lines)
+            {
+                var formed = line.Trim().ToLowerInvariant();
+                if (formed.StartsWith("using"))
+                    result.Append(line).Append("\n");
+                if (formed.StartsWith("namespace"))
+                    classspace = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[1];
+            }
+
+            var classname = block.Lines[0].Words[1].Text;
+
+            result.Append(string.Format("\nnamespace {0}.Tests\n{{\n\t[TestFixture]\n\tpublic class {1}Tests\n\t{{", classspace, classname));
+
+            return result.ToString();
+        }
+    }
+
     public class SetUpFixtureBlock : IBlockGenerator
     {
         public const string Name = "setup-fixture";
@@ -54,7 +95,7 @@ namespace SimpleTest.Analyzer
         public string Generate(WordBlock block)
         {
             var result = new StringBuilder();
-            result.Append("\t\t[TestFixtureSetUp]\n\t\tpublic void SetUpFixture()\n\t\t{");
+            result.Append("\n\t\t[TestFixtureSetUp]\n\t\tpublic void SetUpFixture()\n\t\t{");
 
             result.Append(block.ProcessLines());
             // generate footer
@@ -70,7 +111,7 @@ namespace SimpleTest.Analyzer
         public string Generate(WordBlock block)
         {
             var result = new StringBuilder();
-            result.Append("\t\t[SetUp]\n\t\tpublic void SetUp()\n\t\t{");
+            result.Append("\n\t\t[SetUp]\n\t\tpublic void SetUp()\n\t\t{");
 
             result.Append(block.ProcessLines());
             // generate footer
@@ -87,7 +128,7 @@ namespace SimpleTest.Analyzer
         {
             var result = new StringBuilder();
 
-            result.Append("\t\t[TearDown]\n\t\tpublic void TearDown()\n\t\t{");
+            result.Append("\n\t\t[TearDown]\n\t\tpublic void TearDown()\n\t\t{");
 
             result.Append(block.ProcessLines());
 
@@ -105,7 +146,7 @@ namespace SimpleTest.Analyzer
         {
             var result = new StringBuilder();
             // generate header 
-            result.Append("\t\t[Test]\n\t\tpublic void ");
+            result.Append("\n\t\t[Test]\n\t\tpublic void ");
             // get test name
             var testName = block.Lines[0].Words[1];
             result.Append(testName.Text);

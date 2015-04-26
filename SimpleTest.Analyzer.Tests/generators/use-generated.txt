@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using Autofac.Extras.Moq;
+using Collector223.ApiConnector;
+using Collector223.Core;
+using Collector223.Core.Exceptions;
+using Collector223.Core.Models;
+using Collector223.Parser;
+using EastpeasyMq;
+using Moq;
+using NUnit.Framework;
+using UpdaterApi.Sender.Models;
+
+namespace Collector223.ApiConnector.Tests
+{
+	[TestFixture]
+	public class SenderTests
+	{

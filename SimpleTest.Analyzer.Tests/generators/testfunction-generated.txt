@@ -1,4 +1,5 @@
-﻿		[Test]
+﻿
+		[Test]
 		public void SendContractToApi_ParsableXml_Sent()
 		{
 			using (var mock = AutoMock.GetLoose())
