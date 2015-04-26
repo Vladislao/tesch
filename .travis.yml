@@ -1,0 +1,3 @@
+## Travis CI Integration
+language: csharp
+solution: SimpleTest.Analyzer.sln
