@@ -30,6 +30,21 @@ namespace SimpleTest.Analyzer.Tests
         }
 
         [TestMethod]
+        public void TearDown_Body_Generated()
+        {
+            var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
+            var expected = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "generators", "teardown-generated.txt")).Replace("\r", string.Empty);
+            var testFunction = new TearDown();
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText(file);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks[3]);
+
+            Assert.AreEqual(expected, generated);
+        }
+
+        [TestMethod]
         public void Mock_SimpleInterface_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -82,7 +97,8 @@ namespace SimpleTest.Analyzer.Tests
             var dock = textReader.GetBlocks(formalizedText);
             var generated = testFunction.Generate(dock.Blocks.Last().Lines[2].Words[0]);
 
-            Assert.AreEqual("var actor = mock.Create<Sender>();\n\t\t\tactor.SendContractToApi(\"string\")", generated);
+            Assert.AreEqual("var actor = mock.Create<Sender>();\n\t\t\t\tactor.SendContractToApi(\"string\")", generated);
         }
+
     }
 }

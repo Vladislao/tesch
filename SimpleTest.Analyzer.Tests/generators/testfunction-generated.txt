@@ -1,11 +1,11 @@
-﻿	[Test]
-	public void SendContractToApi_ParsableXml_Sent()
-	{
-		using (var mock = AutoMock.GetLoose())
+﻿		[Test]
+		public void SendContractToApi_ParsableXml_Sent()
 		{
-			mock.Mock<IParserFactory>().Setup(f => f.ParseContract(It.IsAny<object>())).Returns(() => new ContractModel());
-			var actor = mock.Create<Sender>();
-			actor.SendContractToApi("string");
-			mock.Mock<IMongoRepository>().Verify(f => f.Publish(It.IsAny<object>()), Times.Once);
+			using (var mock = AutoMock.GetLoose())
+			{
+				mock.Mock<IParserFactory>().Setup(f => f.ParseContract(It.IsAny<object>())).Returns(() => new ContractModel());
+				var actor = mock.Create<Sender>();
+				actor.SendContractToApi("string");
+				mock.Mock<IMongoRepository>().Verify(f => f.Publish(It.IsAny<object>()), Times.Once);
+			}
 		}
-	}

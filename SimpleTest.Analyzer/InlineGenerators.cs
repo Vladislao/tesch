@@ -88,7 +88,7 @@ namespace SimpleTest.Analyzer
 
             word.Processed = true;
 
-            return string.Format("var actor = mock.Create<{0}>();\n\t\t\tactor.{1}({2})", classname, method, parameters);
+            return string.Format("var actor = mock.Create<{0}>();\n\t\t\t\tactor.{1}({2})", classname, method, parameters);
         }
     }
 
