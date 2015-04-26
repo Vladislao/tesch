@@ -4,7 +4,7 @@ simple language to create tests for your C# code
 ## todo
 * soon
   * complete with moq
-  * complete with (MS\N\X)unit (which one?)
+  * complete with Nunit
 * later
   * nspec
 * paintitblack
