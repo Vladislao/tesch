@@ -5,5 +5,5 @@ install:
  - sudo apt-get install nunit-console
  - nuget restore SimpleTest.Analyzer.sln
 script:
- - xbuild /p:Configuration=Debug SimpleTest.Analyzer.sln
- - nunit-console ./SimpleTest.Analyzer.Tests/bin/Debug/SimpleTest.Analyzer.Tests.dll
+ - xbuild /p:Configuration=Release SimpleTest.Analyzer.sln
+ - nunit-console ./SimpleTest.Analyzer.Tests/bin/Release/SimpleTest.Analyzer.Tests.dll
