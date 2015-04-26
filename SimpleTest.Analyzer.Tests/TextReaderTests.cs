@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace SimpleTest.Analyzer.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class TextReaderTests
     {
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             
         }
 
-        [TestMethod]
+        [Test]
         public void FormalizeText_Fixed_StillFixed()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-fixed.txt"));
@@ -27,7 +27,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(fixedFile, formalizedText);
         }
 
-        [TestMethod]
+        [Test]
         public void FormalizeText_SpaceAndNewlines_Fixed()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-broken.txt"));
@@ -40,7 +40,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(fixedFile, formalizedText);
         }
 
-        [TestMethod]
+        [Test]
         public void FormalizeText_TrimLines_Fixed()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "linestrim-broken.txt"));
@@ -53,7 +53,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(fixedFile, formalizedText);
         }
 
-        [TestMethod]
+        [Test]
         public void FormalizeText_TabOnlyAtStart_Fixed()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "tabs-broken.txt"));
@@ -66,7 +66,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(fixedFile, formalizedText);
         }
 
-        [TestMethod]
+        [Test]
         public void FormalizeText_NewLinesAtEnd_Fixed()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "newlines-atend-broken.txt"));
@@ -79,7 +79,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(fixedFile, formalizedText);
         }
 
-        [TestMethod]
+        [Test]
         public void FormalizeText_WhitespaceBetweenCommas_Fixed()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "whitespace-broken.txt"));
@@ -92,7 +92,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(fixedFile, formalizedText);
         }
 
-        [TestMethod]
+        [Test]
         public void GetBlocks_BlockStartsAfterEmptyString_Correct()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-fixed.txt"));
@@ -111,7 +111,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual("test SendContractToApi_ParsableXml_Sent\n\tmock IParserFactory setup ParseContract(any) returns new ContractModel\n\tact(\"string\")\n\tmock IMongoRepository verify Publish(any) called once", dock.Blocks[4].Text);
         }
 
-        [TestMethod]
+        [Test]
         public void Word_GetValue_NewObject_Correct()
         {
             var word = new Word
@@ -127,7 +127,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual("new ContractModel()", value);
         }
 
-        [TestMethod]
+        [Test]
         public void Word_GetValue_NewObjectWithParams_Correct()
         {
             var word = new Word
@@ -143,7 +143,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual("new ContractModel(522,\"test\")", value);
         }
 
-        [TestMethod]
+        [Test]
         public void Word_GetValue_Number_Correct()
         {
             var word = new Word
@@ -155,7 +155,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual("24", value);
         }
 
-        [TestMethod]
+        [Test]
         public void Word_GetValue_Str_Correct()
         {
             var word = new Word
@@ -167,7 +167,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual("\"24\"", value);
         }
 
-        [TestMethod]
+        [Test]
         public void SplitWhitespaces_WhitespaceInString_Correct()
         {
             var textReader = new TextReader();
@@ -178,7 +178,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual("act(\"string \\\" quote \\\"           test\")", words[0]);
         }
 
-        [TestMethod]
+        [Test]
         public void SplitWhitespaces_TwoWords_Correct()
         {
             var textReader = new TextReader();

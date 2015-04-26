@@ -1,20 +1,20 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace SimpleTest.Analyzer.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class GeneratorsTests
     {
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             
         }
 
-        [TestMethod]
+        [Test]
         public void Generator_Simple_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -25,8 +25,8 @@ namespace SimpleTest.Analyzer.Tests
 
             Assert.AreEqual(expected, generated);
         }
-        
-        [TestMethod]
+
+        [Test]
         public void TextReader_Body_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -41,7 +41,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(expected, generated);
         }
 
-        [TestMethod]
+        [Test]
         public void SetUp_Body_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -56,7 +56,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(expected, generated);
         }
 
-        [TestMethod]
+        [Test]
         public void SetUpFixture_Body_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -71,7 +71,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(expected, generated);
         }
 
-        [TestMethod]
+        [Test]
         public void Use_Body_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -86,7 +86,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(expected, generated);
         }
 
-        [TestMethod]
+        [Test]
         public void TearDown_Body_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -101,7 +101,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(expected, generated);
         }
 
-        [TestMethod]
+        [Test]
         public void Mock_SimpleInterface_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -115,7 +115,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual("mock.Mock<IParserFactory>()", generated);
         }
 
-        [TestMethod]
+        [Test]
         public void Setup_Empty_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -129,7 +129,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(".Setup(f => f.ParseContract(It.IsAny<object>()))", generated);
         }
 
-        [TestMethod]
+        [Test]
         public void Returns_NewModel_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
@@ -143,7 +143,7 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(".Returns(() => new ContractModel())", generated);
         }
 
-        [TestMethod]
+        [Test]
         public void Act_WithParameter_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
