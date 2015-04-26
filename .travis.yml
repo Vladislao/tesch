@@ -1,3 +1,9 @@
 ## Travis CI Integration
 language: csharp
 solution: SimpleTest.Analyzer.sln
+install:
+ - sudo apt-get install nunit-console
+ - nuget restore SimpleTest.Analyzer.sln
+script:
+ - xbuild /p:Configuration=Release SimpleTest.Analyzer.sln
+ - nunit-console ./SimpleTest.Analyzer.Tests/bin/Release/SimpleTest.Analyzer.Tests.dll
