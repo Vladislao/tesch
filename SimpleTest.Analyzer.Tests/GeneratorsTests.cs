@@ -15,11 +15,11 @@ namespace SimpleTest.Analyzer.Tests
         }
         
         [TestMethod]
-        public void TestFunction_Body_Generated()
+        public void TextReader_Body_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
             var expected = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "generators", "testfunction-generated.txt")).Replace("\r", string.Empty);
-            var testFunction = new TestFunction();
+            var testFunction = new TestBlock();
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(file);
@@ -30,11 +30,41 @@ namespace SimpleTest.Analyzer.Tests
         }
 
         [TestMethod]
+        public void SetUp_Body_Generated()
+        {
+            var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
+            var expected = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "generators", "setup-generated.txt")).Replace("\r", string.Empty);
+            var testFunction = new SetUpBlock();
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText(file);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks[2]);
+
+            Assert.AreEqual(expected, generated);
+        }
+
+        [TestMethod]
+        public void SetUpFixture_Body_Generated()
+        {
+            var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
+            var expected = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "generators", "setup-fixture-generated.txt")).Replace("\r", string.Empty);
+            var testFunction = new SetUpFixtureBlock();
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText(file);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks[1]);
+
+            Assert.AreEqual(expected, generated);
+        }
+
+        [TestMethod]
         public void TearDown_Body_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
             var expected = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "generators", "teardown-generated.txt")).Replace("\r", string.Empty);
-            var testFunction = new TearDown();
+            var testFunction = new TearDownBlock();
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(file);
@@ -59,7 +89,7 @@ namespace SimpleTest.Analyzer.Tests
         }
 
         [TestMethod]
-        public void Setup_WithAnyParam_Generated()
+        public void Setup_Empty_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple.txt"));
             var testFunction = new Setup();
