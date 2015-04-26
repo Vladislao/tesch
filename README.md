@@ -10,7 +10,7 @@ simple language to create tests for your C# code
 * paintitblack
   * visual studio integration
   * snippets
-  * completiom
+  * completion
   * highlight
   
 ## examples
@@ -29,7 +29,7 @@ test SendContractToApi_ParsableXml_Sent
 	act("string")
 	mock IMongoRepository verify Publish(any) called once
 ```
-Your default pain
+your default pain
 ```c#
 using System;
 using System.Collections.Generic;
