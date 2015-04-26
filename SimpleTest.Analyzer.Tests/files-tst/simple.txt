@@ -1,4 +1,4 @@
-﻿use Sender files-tst\simple-target.txt
+﻿use Sender files-tst/simple-target.txt
 
 setup-fixture
 
