@@ -20,34 +20,19 @@ namespace SimpleTest.Analyzer
             Add(SetUpFixtureBlock.Name, new SetUpFixtureBlock());
             Add(SetUpBlock.Name, new SetUpBlock());
             Add(UseBlock.Name, new UseBlock());
+            Add(VarBlock.Name, new VarBlock());
         }
     }
 
-    public static class BlockExtensions
+    public class VarBlock : IBlockGenerator
     {
-        public static string ProcessLines(this WordBlock block, string tab = "\t\t\t")
+        public const string Name = "var";
+
+        //private Mock<IRabbitMqProvider> _queue;
+
+        public string Generate(WordBlock block)
         {
-            var result = new StringBuilder();
-            // lets make body
-            foreach (var line in block.Lines.Skip(1))
-            {
-                result.Append(tab);
-                foreach (var word in line.Words)
-                {
-                    if (word.Processed)
-                        continue;
-
-                    var txt = word.GetPlain();
-                    if (Generator.InlineGenerators.ContainsKey(txt))
-                        result.Append(Generator.InlineGenerators[txt].Generate(word));
-                }
-                result.Append(";\n");
-            }
-            // in case nothing - newline
-            if (block.Lines.Count < 2)
-                result.Append("\n");
-
-            return result.ToString();
+            return string.Format("private {0} _{1};", block.Lines[0].Words[1].Text, block.Lines[0].Words[2].Text);
         }
     }
 
@@ -158,6 +143,34 @@ namespace SimpleTest.Analyzer
             result.Append("\t\t\t}\n");
             // generate footer
             result.Append("\t\t}\n");
+            return result.ToString();
+        }
+    }
+
+    public static class BlockExtensions
+    {
+        public static string ProcessLines(this WordBlock block, string tab = "\t\t\t")
+        {
+            var result = new StringBuilder();
+            // lets make body
+            foreach (var line in block.Lines.Skip(1))
+            {
+                result.Append(tab);
+                foreach (var word in line.Words)
+                {
+                    if (word.Processed)
+                        continue;
+
+                    var txt = word.GetPlain();
+                    if (Generator.InlineGenerators.ContainsKey(txt))
+                        result.Append(Generator.InlineGenerators[txt].Generate(word));
+                }
+                result.Append(";\n");
+            }
+            // in case nothing - newline
+            if (block.Lines.Count < 2)
+                result.Append("\n");
+
             return result.ToString();
         }
     }

@@ -15,6 +15,19 @@ namespace SimpleTest.Analyzer.Tests
         }
 
         [Test]
+        public void FormalizeText_Brace_Ignored()
+        {
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "brace-broken.txt"));
+            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "brace-fixed.txt")).Replace("\r", string.Empty);
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText(brokenFile);
+
+            Assert.IsNotNull(formalizedText);
+            Assert.AreEqual(fixedFile, formalizedText);
+        }
+
+        [Test]
         public void FormalizeText_Fixed_StillFixed()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "simple-fixed.txt"));
@@ -188,6 +201,19 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual(2, words.Count);
             Assert.AreEqual("act(\"string \\\" quote \\\"           test\")", words[0]);
             Assert.AreEqual("test", words[1]);
+        }
+
+        [Test]
+        public void SplitWhitespaces_QuoteAfterWhitespace_Correct()
+        {
+            var textReader = new TextReader();
+
+            var words = textReader.SplitWhitespaces("RegistratonNumber = \"п-1\"");
+
+            Assert.AreEqual(3, words.Count);
+            Assert.AreEqual("RegistratonNumber", words[0]);
+            Assert.AreEqual("=", words[1]);
+            Assert.AreEqual("\"п-1\"", words[2]);
         }
     }
 }

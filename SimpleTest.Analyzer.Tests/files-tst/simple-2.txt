@@ -1,4 +1,4 @@
-﻿use Sender files-target/simple.txt
+﻿use ContractIndexer files-target/simple-2.txt
 
 setup-fixture
 
@@ -6,7 +6,30 @@ setup
 
 teardown
 
-test SendContractToApi_ParsableXml_Sent
-	mock IParserFactory setup ParseContract(any) returns new ContractModel
-	act("string")
-	mock IMongoRepository verify Publish(any) called once
+var Mock<IRabbitMqProvider> queue
+
+func void SetUpMoq(AutoMock mock)
+	queue = new Mock<IRabbitMqProvider>
+	mock provide IFileSystem new MockFileSystem
+	mock IXmlParser setup ParseContractXml("good") returns new Contract
+	{
+		Id = new Contract.ContractId
+		{
+			RegistratonNumber = "п-1",
+			Version = 1
+		},
+		PurchaseNumber = "123"
+	}
+	mock IXmlParser setup ParseContractXml("bad") throws Exception
+	mock IHelpers setup GetDateTimePath(any-DateTime) returns @"01\01\01"
+	mock ISettings setup LocalContractsPath returns @"C:\test\"
+	mock IRabbitMqService setup GetInstance(any-string, any-string, -1, null) returns queue.Object
+
+test ProcessContractXml_NewGoodXml_Process
+	SetUpMoq(mock)
+	act("good")
+	mock IMongoRepository verify Save(any-string,any-Contract,any-string) called once
+	queue verify Publish(any-string) called once
+	mock ISender verify SendContractToApi(any-string) called once
+	mock ILogHelper verify Info(any-string,any-string) called once
+

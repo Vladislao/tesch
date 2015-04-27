@@ -7,7 +7,7 @@ namespace SimpleTest.Analyzer
 {
     public class WordDock
     {
-        public List<WordBlock> Blocks { get; set; } 
+        public List<WordBlock> Blocks { get; set; }
     }
 
     public class WordBlock
@@ -52,7 +52,7 @@ namespace SimpleTest.Analyzer
                 // in case it is not closed - just empty call
                 return Text + "()";
             }
-            
+
             // retrieve params
             var prms = GetParams();
 
@@ -62,17 +62,13 @@ namespace SimpleTest.Analyzer
             foreach (var param in prms)
             {
                 var txt = param;
-                if (param.Contains("any"))
+                if (param.StartsWith("any"))
                 {
-                    switch (param)
-                    {
-                        case "any-string":
-                            txt = "It.IsAny<string>()";
-                            break;
-                        default:
-                            txt = "It.IsAny<object>()";
-                            break;
-                    }
+                    var type = "object";
+                    if (param != "any")
+                        type = param.Substring(4);
+
+                    txt = string.Format("It.IsAny<{0}>()", type);
                 }
                 result.Append(txt + ",");
             }
@@ -88,17 +84,17 @@ namespace SimpleTest.Analyzer
         /// <returns></returns>
         public List<string> GetParams()
         {
-            if(string.IsNullOrWhiteSpace(Text))
+            if (string.IsNullOrWhiteSpace(Text))
                 return new List<string>();
 
             var first = Text.IndexOf('(');
             var last = Text.IndexOf(')');
 
-            if(first < 0 || last < 0 || first >= last)
+            if (first < 0 || last < 0 || first >= last)
                 return new List<string>();
-            
+
             var inside = Text.Substring(first + 1, last - first - 1);
-            return inside.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries).ToList();
+            return inside.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
 
         /// <summary>
@@ -145,6 +141,8 @@ namespace SimpleTest.Analyzer
         {
             var whitespace = 0;
             var newline = 0;
+            var brace = 0;
+
 
             bool parenthesis = false;
             bool quote = false;
@@ -158,6 +156,13 @@ namespace SimpleTest.Analyzer
 
                 // do not touch strings
                 if (quote && ch != '\"')
+                {
+                    result.Append(ch);
+                    continue;
+                }
+
+                // do not touch braces content
+                if (brace > 0)
                 {
                     result.Append(ch);
                     continue;
@@ -198,8 +203,11 @@ namespace SimpleTest.Analyzer
 
                 if (ch == '(') parenthesis = true;
                 if (ch == ')') parenthesis = false;
-                
+
                 if (ch == '\"' && result[result.Length - 1] != '\\') quote = !quote;
+
+                if (ch == '{') brace++;
+                if (ch == '}') brace = brace > 1 ? brace - 1 : 0;
 
                 result.Append(ch);
             }
@@ -207,6 +215,11 @@ namespace SimpleTest.Analyzer
             return result.ToString().Trim();
         }
 
+        /// <summary>
+        /// add lines and words to block
+        /// </summary>
+        /// <param name="dock"></param>
+        /// <param name="txt"></param>
         private void CombineBlock(WordDock dock, string txt)
         {
             var lines = GetLines(txt);
@@ -231,6 +244,11 @@ namespace SimpleTest.Analyzer
             dock.Blocks.Add(block);
         }
 
+        /// <summary>
+        /// get docked blocks from text
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public WordDock GetBlocks(string text)
         {
             var result = new WordDock
@@ -266,6 +284,11 @@ namespace SimpleTest.Analyzer
             return result;
         }
 
+        /// <summary>
+        /// get line objects from text
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public List<WordLine> GetLines(string text)
         {
             var lines = text.Split('\n');
@@ -283,6 +306,11 @@ namespace SimpleTest.Analyzer
             return result;
         }
 
+        /// <summary>
+        /// split text to words
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public List<string> SplitWhitespaces(string text)
         {
             var words = new List<string>();
@@ -308,15 +336,30 @@ namespace SimpleTest.Analyzer
                 if (char.IsWhiteSpace(ch)) whitespace = true;
                 else whitespace = false;
 
-                if (ch == '\"' && wordBuilder[wordBuilder.Length - 1] != '\\') quote = !quote;
+                if (ch == '\"')
+                    if (wordBuilder.Length > 0)
+                    {
+                        if (wordBuilder[wordBuilder.Length - 1] != '\\')
+                        {
+                            quote = !quote;
+                        }
+                    }
+                    else
+                        quote = !quote;
+
 
                 wordBuilder.Append(ch);
             }
             // add the last word
             words.Add(wordBuilder.ToString());
             return words;
-        } 
+        }
 
+        /// <summary>
+        /// get word objects from text
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public List<Word> GetWords(string text)
         {
             Word prev = null;
@@ -325,7 +368,7 @@ namespace SimpleTest.Analyzer
 
             foreach (var word in words)
             {
-                if(string.IsNullOrWhiteSpace(word))
+                if (string.IsNullOrWhiteSpace(word))
                     continue;
 
                 var wordObj = new Word
@@ -336,7 +379,7 @@ namespace SimpleTest.Analyzer
 
                 if (prev != null)
                     prev.Next = wordObj;
-                
+
                 prev = wordObj;
                 result.Add(wordObj);
             }
