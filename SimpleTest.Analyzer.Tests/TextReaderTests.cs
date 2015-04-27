@@ -17,8 +17,8 @@ namespace SimpleTest.Analyzer.Tests
         [Test]
         public void FormalizeText_Fixed_StillFixed()
         {
-            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-fixed.txt"));
-            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-fixed.txt")).Replace("\r", string.Empty);
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "simple-fixed.txt"));
+            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "simple-fixed.txt")).Replace("\r", string.Empty);
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(brokenFile);
@@ -30,8 +30,8 @@ namespace SimpleTest.Analyzer.Tests
         [Test]
         public void FormalizeText_SpaceAndNewlines_Fixed()
         {
-            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-broken.txt"));
-            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-fixed.txt")).Replace("\r", string.Empty);
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "simple-broken.txt"));
+            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "simple-fixed.txt")).Replace("\r", string.Empty);
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(brokenFile);
@@ -43,8 +43,8 @@ namespace SimpleTest.Analyzer.Tests
         [Test]
         public void FormalizeText_TrimLines_Fixed()
         {
-            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "linestrim-broken.txt"));
-            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-fixed.txt")).Replace("\r", string.Empty);
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "linestrim-broken.txt"));
+            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "simple-fixed.txt")).Replace("\r", string.Empty);
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(brokenFile);
@@ -56,8 +56,8 @@ namespace SimpleTest.Analyzer.Tests
         [Test]
         public void FormalizeText_TabOnlyAtStart_Fixed()
         {
-            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "tabs-broken.txt"));
-            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-fixed.txt")).Replace("\r", string.Empty);
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "tabs-broken.txt"));
+            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "simple-fixed.txt")).Replace("\r", string.Empty);
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(brokenFile);
@@ -69,8 +69,8 @@ namespace SimpleTest.Analyzer.Tests
         [Test]
         public void FormalizeText_NewLinesAtEnd_Fixed()
         {
-            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "newlines-atend-broken.txt"));
-            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-fixed.txt")).Replace("\r", string.Empty);
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "newlines-atend-broken.txt"));
+            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "simple-fixed.txt")).Replace("\r", string.Empty);
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(brokenFile);
@@ -82,8 +82,8 @@ namespace SimpleTest.Analyzer.Tests
         [Test]
         public void FormalizeText_WhitespaceBetweenCommas_Fixed()
         {
-            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "whitespace-broken.txt"));
-            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "whitespace-fixed.txt")).Replace("\r", string.Empty);
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "whitespace-broken.txt"));
+            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "whitespace-fixed.txt")).Replace("\r", string.Empty);
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(brokenFile);
@@ -95,7 +95,7 @@ namespace SimpleTest.Analyzer.Tests
         [Test]
         public void GetBlocks_BlockStartsAfterEmptyString_Correct()
         {
-            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "reader", "simple-fixed.txt"));
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "simple-fixed.txt"));
             var textReader = new TextReader();
 
             var formalizedText = textReader.FormalizeText(brokenFile);

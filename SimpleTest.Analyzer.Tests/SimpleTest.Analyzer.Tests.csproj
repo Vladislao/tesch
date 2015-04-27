@@ -60,10 +60,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="files-cs\simple-2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="files-cs\simple.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="files-tst\simple-target.txt">
+    <Content Include="files-tst\simple-2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="files-target\simple-2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="files-target\simple.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="files-tst\simple.txt">
@@ -84,25 +93,25 @@
     <Content Include="generators\testfunction-generated.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="reader\whitespace-fixed.txt">
+    <Content Include="formalize\whitespace-fixed.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="reader\whitespace-broken.txt">
+    <Content Include="formalize\whitespace-broken.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="reader\newlines-atend-broken.txt">
+    <Content Include="formalize\newlines-atend-broken.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="reader\tabs-broken.txt">
+    <Content Include="formalize\tabs-broken.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="reader\linestrim-broken.txt">
+    <Content Include="formalize\linestrim-broken.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="reader\simple-fixed.txt">
+    <Content Include="formalize\simple-fixed.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="reader\simple-broken.txt">
+    <Content Include="formalize\simple-broken.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

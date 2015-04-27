@@ -1,0 +1,231 @@
+﻿using System;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using Autofac.Extras.Moq;
+using Collector.ApiConnector;
+using Collector.Core;
+using Collector.Core.Exceptions;
+using Collector.Core.Models;
+using Collector.Index.Indexers;
+using Collector.Index.Repository;
+using Common.Core;
+using EastpeasyMq;
+using MongoDB.Bson;
+using Moq;
+using NLogHelper;
+using NUnit.Framework;
+using ISettings = Collector.Index.ISettings;
+
+namespace Collector.IndexTests
+{
+    [TestFixture]
+    public class ContractIndexerTests
+    {
+        private Mock<IRabbitMqProvider> _queue;
+
+        [TestFixtureSetUp]
+        public void SetUpFixture()
+        {
+        }
+
+        private void SetUpMoq(AutoMock mock)
+        {
+            _queue = new Mock<IRabbitMqProvider>();
+
+            mock.Provide<IFileSystem>(new MockFileSystem());
+            // setup mocks
+            mock.Mock<IXmlParser>().Setup(parser => parser.ParseContractXml("good")).Returns(() => new Contract
+            {
+                Id = new Contract.ContractId
+                {
+                    RegistratonNumber = "п-1",
+                    Version = 1
+                },
+                PurchaseNumber = "123"
+            });
+            mock.Mock<IXmlParser>().Setup(parser => parser.ParseContractXml("bad")).Throws<Exception>();
+            mock.Mock<IHelpers>().Setup(parser => parser.GetDateTimePath(It.IsAny<DateTime>())).Returns(() => @"01\01\01");
+            mock.Mock<ISettings>().Setup(parser => parser.LocalContractsPath).Returns(() => @"C:\test\");
+            mock.Mock<IRabbitMqService>().Setup(parser => parser.GetInstance(It.IsAny<string>(), It.IsAny<string>(), -1, null)).Returns(() => _queue.Object);
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+        }
+
+        [Test]
+        public void ProcessContractXml_NewGoodXml_Process()
+        {
+            using (var mock = AutoMock.GetLoose())
+            {
+                // init
+                SetUpMoq(mock);
+                var actor = mock.Create<ContractIndexer>();
+                // act
+                actor.ProcessContractXml("good");
+
+                // saved in mongo
+                mock.Mock<IMongoRepository>().Verify(system => system.Save(It.IsAny<string>(), It.IsAny<Contract>(), It.IsAny<string>()), Times.Once);
+                // sent to rabbit
+                _queue.Verify(system => system.Publish(It.IsAny<string>()), Times.Once);
+                // sent to api
+                mock.Mock<ISender>().Verify(system => system.SendContractToApi(It.IsAny<string>()), Times.Once);
+                // logged
+                mock.Mock<ILogHelper>().Verify(system => system.Info(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            }
+        }
+
+        [Test]
+        public void ProcessContractXml_ExistsingGoodXml_ExistingSourceHigher_Process()
+        {
+            using (var mock = AutoMock.GetLoose())
+            {
+                // init
+                SetUpMoq(mock);
+                mock.Mock<IMongoRepository>().Setup(moq => moq.FindOneById<Contract>(It.IsAny<string>(), It.IsAny<BsonValue>(), It.IsAny<string>())).Returns(() => new Contract { });
+
+                var actor = mock.Create<ContractIndexer>();
+                // act
+                actor.ProcessContractXml("good");
+
+                // saved in mongo
+                mock.Mock<IMongoRepository>().Verify(system => system.Save(It.IsAny<string>(), It.IsAny<Contract>(), It.IsAny<string>()), Times.Once);
+                // sent to rabbit
+                _queue.Verify(system => system.Publish(It.IsAny<string>()), Times.Once);
+                // sent to api
+                mock.Mock<ISender>().Verify(system => system.SendContractToApi(It.IsAny<string>()), Times.Once);
+                // logged
+                mock.Mock<ILogHelper>().Verify(system => system.Info(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            }
+        }
+
+        [Test]
+        public void ProcessContractXml_ExistsingGoodXml_ExistingSourceLower_Skip()
+        {
+            using (var mock = AutoMock.GetLoose())
+            {
+                // init
+                SetUpMoq(mock);
+                mock.Mock<IMongoRepository>().Setup(moq => moq.FindOneById<Contract>(It.IsAny<string>(), It.IsAny<BsonValue>(), It.IsAny<string>())).Returns(() => new Contract
+                {
+                    SourceWeight = -2
+                });
+
+                var actor = mock.Create<ContractIndexer>();
+                // act
+                actor.ProcessContractXml("good");
+
+                // saved in mongo
+                mock.Mock<IMongoRepository>().Verify(system => system.Save(It.IsAny<string>(), It.IsAny<Contract>(), It.IsAny<string>()), Times.Never);
+                // sent to rabbit
+                _queue.Verify(system => system.Publish(It.IsAny<string>()), Times.Never);
+                // sent to api
+                mock.Mock<ISender>().Verify(system => system.SendContractToApi(It.IsAny<string>()), Times.Never);
+                // logged
+                mock.Mock<ILogHelper>().Verify(system => system.Info(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            }
+        }
+
+
+        [Test]
+        public void ProcessContractXml_BadXml_CatchException_ThrowParserException()
+        {
+            using (var mock = AutoMock.GetLoose())
+            {
+                // init
+                SetUpMoq(mock);
+
+                var actor = mock.Create<ContractIndexer>();
+                // act
+                Assert.Throws<ParserException>(() => actor.ProcessContractXml("bad"));
+
+                // saved in mongo
+                mock.Mock<IMongoRepository>().Verify(system => system.Save(It.IsAny<string>(), It.IsAny<Contract>(), It.IsAny<string>()), Times.Never);
+                // sent to rabbit
+                _queue.Verify(system => system.Publish(It.IsAny<string>()), Times.Never);
+                // sent to api
+                mock.Mock<ISender>().Verify(system => system.SendContractToApi(It.IsAny<string>()), Times.Never);
+                // logged
+                mock.Mock<ILogHelper>().Verify(system => system.Info(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            }
+        }
+
+        [Test]
+        public void ProcessContractXml_MongoFailing_ThrowException()
+        {
+            using (var mock = AutoMock.GetLoose())
+            {
+                // init
+                SetUpMoq(mock);
+                mock.Mock<IMongoRepository>().Setup(moq => moq.Save(It.IsAny<string>(), It.IsAny<Contract>(), It.IsAny<string>())).Throws<Exception>();
+
+                var actor = mock.Create<ContractIndexer>();
+                // act
+                Assert.Throws<Exception>(() => actor.ProcessContractXml("good"));
+
+                // saved in mongo
+                mock.Mock<IMongoRepository>().Verify(system => system.Save(It.IsAny<string>(), It.IsAny<Contract>(), It.IsAny<string>()), Times.Once);
+                // sent to rabbit
+                _queue.Verify(system => system.Publish(It.IsAny<string>()), Times.Never);
+                // sent to api
+                mock.Mock<ISender>().Verify(system => system.SendContractToApi(It.IsAny<string>()), Times.Never);
+                // logged
+                mock.Mock<ILogHelper>().Verify(system => system.Info(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            }
+        }
+
+        [Test]
+        public void ProcessContractXml_RabbitFailing_ThrowException()
+        {
+            using (var mock = AutoMock.GetLoose())
+            {
+                // init
+                SetUpMoq(mock);
+                _queue.Setup(moq => moq.Publish(It.IsAny<string>())).Throws<Exception>();
+
+                var actor = mock.Create<ContractIndexer>();
+                // act
+                Assert.Throws<Exception>(() => actor.ProcessContractXml("good"));
+
+                // saved in mongo
+                mock.Mock<IMongoRepository>().Verify(system => system.Save(It.IsAny<string>(), It.IsAny<Contract>(), It.IsAny<string>()), Times.Once);
+                // sent to rabbit
+                _queue.Verify(system => system.Publish(It.IsAny<string>()), Times.Once);
+                // sent to api
+                mock.Mock<ISender>().Verify(system => system.SendContractToApi(It.IsAny<string>()), Times.Never);
+                // logged
+                mock.Mock<ILogHelper>().Verify(system => system.Info(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            }
+        }
+
+        [Test]
+        public void ProcessContractXml_SenderFailing_ThrowException()
+        {
+            using (var mock = AutoMock.GetLoose())
+            {
+                // init
+                SetUpMoq(mock);
+                mock.Mock<ISender>().Setup(moq => moq.SendContractToApi(It.IsAny<string>())).Throws<Exception>();
+
+                var actor = mock.Create<ContractIndexer>();
+                // act
+                Assert.Throws<Exception>(() => actor.ProcessContractXml("good"));
+
+                // saved in mongo
+                mock.Mock<IMongoRepository>().Verify(system => system.Save(It.IsAny<string>(), It.IsAny<Contract>(), It.IsAny<string>()), Times.Once);
+                // sent to rabbit
+                _queue.Verify(system => system.Publish(It.IsAny<string>()), Times.Once);
+                // sent to api
+                mock.Mock<ISender>().Verify(system => system.SendContractToApi(It.IsAny<string>()), Times.Once);
+                // logged
+                mock.Mock<ILogHelper>().Verify(system => system.Info(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            }
+        }
+    }
+}

@@ -1,0 +1,59 @@
+﻿using System;
+using System.IO;
+using System.IO.Abstractions;
+using Collector.ApiConnector;
+using Collector.Core;
+using Collector.Core.Exceptions;
+using Collector.Core.Models;
+using Collector.Index.Repository;
+using Common.Core;
+using EastpeasyMq;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using MongoProvider;
+using NLogHelper;
+
+namespace Collector.Index.Indexers
+{
+    public interface IContractIndexer
+    {
+        void IndexContracts();
+    }
+
+    public class ContractIndexer : IContractIndexer
+    {
+        private readonly ISender _sender;
+        private readonly IMongoRepository _mongoRepository;
+        private readonly IRabbitMqService _rabbitMqService;
+        private readonly ILogHelper _logHelper;
+        private readonly ISettings _settings;
+        private readonly IXmlParser _xmlParser;
+        private readonly IFileSystem _fileSystem;
+        private readonly IHelpers _helpers;
+        private readonly IRabbitMqProvider _notificationEventsPurchaseNumbersToRequest;
+
+        public ContractIndexer(ISender sender, IMongoRepository mongoRepository, IRabbitMqService rabbitMqService, ILogHelper logHelper, 
+            ISettings settings, IXmlParser xmlParser, IFileSystem fileSystem, IHelpers helpers)
+        {
+            _sender = sender;
+            _mongoRepository = mongoRepository;
+            _rabbitMqService = rabbitMqService;
+            _logHelper = logHelper;
+            _settings = settings;
+            _xmlParser = xmlParser;
+            _fileSystem = fileSystem;
+            _helpers = helpers;
+            _notificationEventsPurchaseNumbersToRequest = rabbitMqService.GetInstance("NotificationEventsPurchaseNumbersToRequest", _settings.RabbitConnectionString, -1);
+        }
+
+        public void IndexContracts()
+        {
+			// somelogic
+        }
+
+        public void ProcessContractXml(string xml)
+        {
+			// somelogic
+        }
+    }
+}
