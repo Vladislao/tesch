@@ -27,6 +27,7 @@ namespace SimpleTest.Analyzer.Tests
         }
 
         [Test]
+        [Ignore]
         public void Generator_Simple2_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple-2.txt"));
