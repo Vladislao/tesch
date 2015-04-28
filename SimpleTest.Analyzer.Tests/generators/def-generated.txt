@@ -1,0 +1,11 @@
+﻿
+		private void SetUpMoq(AutoMock mock)
+		{
+			_queue = new Mock<IRabbitMqProvider>();
+			mock.Provide<IFileSystem>(new MockFileSystem());
+			mock.Mock<IXmlParser>().Setup(f => f.ParseContractXml("good")).Returns(() => new Contract {Id = new Contract.ContractId{RegistratonNumber = "п-1",Version = 1},PurchaseNumber = "123"});
+			mock.Mock<IXmlParser>().Setup(f => f.ParseContractXml("bad")).Throws<Exception>();
+			mock.Mock<IHelpers>().Setup(f => f.GetDateTimePath(It.IsAny<DateTime>())).Returns(() => @"01\01\01");
+			mock.Mock<ISettings>().Setup(f => f.LocalContractsPath).Returns(() => @"C:\test\");
+			mock.Mock<IRabbitMqService>().Setup(f => f.GetInstance(It.IsAny<string>(), It.IsAny<string>(), -1, null)).Returns(() => _queue.Object);
+		}

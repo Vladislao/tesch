@@ -1,0 +1,8 @@
+﻿{
+	Id = new Contract.ContractId
+	{
+		RegistratonNumber = "п-1",
+		Version = 1
+	},
+	PurchaseNumber = "123"
+}

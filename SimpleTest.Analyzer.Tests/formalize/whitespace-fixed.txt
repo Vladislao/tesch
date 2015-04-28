@@ -7,6 +7,6 @@ setup
 teardown
 
 test SendContractToApi_ParsableXml_Sent
-	mock IParserFactory setup ParseContract(any,55) returns new ContractModel
+	mock IParserFactory setup ParseContract(any, 55) returns new ContractModel
 	act("string \" quote \"           test")
 	mock IMongoRepository verify Publish(any) called once

@@ -21,6 +21,27 @@ namespace SimpleTest.Analyzer
             Add(SetUpBlock.Name, new SetUpBlock());
             Add(UseBlock.Name, new UseBlock());
             Add(VarBlock.Name, new VarBlock());
+            Add(DefBlock.Name, new DefBlock());
+        }
+    }
+
+    public class DefBlock : IBlockGenerator
+    {
+        public const string Name = "def";
+
+        //        private void SetUpMoq(AutoMock mock)
+        //        {
+        //        }
+
+        public string Generate(WordBlock block)
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(string.Format("\n\t\tprivate {0} {1}\n\t\t{{\n", block.Lines[0].Words[1].Text, block.Lines[0].Words[2].GetFunction()));
+            stringBuilder.Append(block.ProcessLines());
+            stringBuilder.Append("\t\t}\n");
+
+            return stringBuilder.ToString();
         }
     }
 
@@ -32,7 +53,7 @@ namespace SimpleTest.Analyzer
 
         public string Generate(WordBlock block)
         {
-            return string.Format("private {0} _{1};", block.Lines[0].Words[1].Text, block.Lines[0].Words[2].Text);
+            return string.Format("private {0} {1};", block.Lines[0].Words[1].Text, block.Lines[0].Words[2].Text);
         }
     }
 
@@ -164,6 +185,8 @@ namespace SimpleTest.Analyzer
                     var txt = word.GetPlain();
                     if (Generator.InlineGenerators.ContainsKey(txt))
                         result.Append(Generator.InlineGenerators[txt].Generate(word));
+                    else
+                        result.Append(txt);
                 }
                 result.Append(";\n");
             }

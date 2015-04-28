@@ -15,7 +15,33 @@ namespace SimpleTest.Analyzer.Tests
         }
 
         [Test]
-        public void FormalizeText_Brace_Ignored()
+        public void FormalizeText_Brace_SaveNewlineAfterLastBrace()
+        {
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "brace-broken.txt"));
+            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "brace-fixed.txt")).Replace("\r", string.Empty);
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText("new Contract\n" + brokenFile + "\nnewline");
+
+            Assert.IsNotNull(formalizedText);
+            Assert.AreEqual("new Contract " + fixedFile + "\nnewline", formalizedText);
+        }
+
+        [Test]
+        public void FormalizeText_Brace_RemoveAllWhitespacesBeforeBrace()
+        {
+            var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "brace-broken.txt"));
+            var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "brace-fixed.txt")).Replace("\r", string.Empty);
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText("new Contract\n" + brokenFile);
+
+            Assert.IsNotNull(formalizedText);
+            Assert.AreEqual("new Contract " + fixedFile, formalizedText);
+        }
+
+        [Test]
+        public void FormalizeText_Brace_IntoOneLine()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "brace-broken.txt"));
             var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "brace-fixed.txt")).Replace("\r", string.Empty);
@@ -93,7 +119,7 @@ namespace SimpleTest.Analyzer.Tests
         }
 
         [Test]
-        public void FormalizeText_WhitespaceBetweenCommas_Fixed()
+        public void FormalizeText_WhitespaceBetweenCommas_Saved()
         {
             var brokenFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "whitespace-broken.txt"));
             var fixedFile = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "formalize", "whitespace-fixed.txt")).Replace("\r", string.Empty);
@@ -153,7 +179,27 @@ namespace SimpleTest.Analyzer.Tests
             };
             var value = word.GetValue();
 
-            Assert.AreEqual("new ContractModel(522,\"test\")", value);
+            Assert.AreEqual("new ContractModel(522, \"test\")", value);
+        }
+
+        [Test]
+        public void Word_GetValue_NewObjectWithProps_Correct()
+        {
+            var word = new Word
+            {
+                Text = "new",
+                Next = new Word
+                {
+                    Text = "ContractModel",
+                    Next = new Word
+                    {
+                        Text = "{Id = new Contract.ContractId{RegistratonNumber = \"п-1\",Version = 1},PurchaseNumber = \"123\"}"
+                    }
+                }
+            };
+            var value = word.GetValue();
+
+            Assert.AreEqual("new ContractModel {Id = new Contract.ContractId{RegistratonNumber = \"п-1\",Version = 1},PurchaseNumber = \"123\"}", value);
         }
 
         [Test]
@@ -178,6 +224,30 @@ namespace SimpleTest.Analyzer.Tests
             var value = word.GetValue();
 
             Assert.AreEqual("\"24\"", value);
+        }
+
+        [Test]
+        public void Word_GetFunction_Call_Correct()
+        {
+            var word = new Word
+            {
+                Text = "ParseContract(any)"
+            };
+            var value = word.GetFunction();
+
+            Assert.AreEqual("ParseContract(It.IsAny<object>())", value);
+        }
+
+        [Test]
+        public void Word_GetFunction_Def_Correct()
+        {
+            var word = new Word
+            {
+                Text = "SetUpMoq(AutoMock mock)"
+            };
+            var value = word.GetFunction();
+
+            Assert.AreEqual("SetUpMoq(AutoMock mock)", value);
         }
 
         [Test]
@@ -214,6 +284,32 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual("RegistratonNumber", words[0]);
             Assert.AreEqual("=", words[1]);
             Assert.AreEqual("\"п-1\"", words[2]);
+        }
+
+        [Test]
+        public void SplitWhitespaces_WhitespaceBetweenCommas_AsOneWord()
+        {
+            var textReader = new TextReader();
+
+            var words = textReader.SplitWhitespaces("private void SetUpMoq(AutoMock mock)");
+
+            Assert.AreEqual(3, words.Count);
+            Assert.AreEqual("private", words[0]);
+            Assert.AreEqual("void", words[1]);
+            Assert.AreEqual("SetUpMoq(AutoMock mock)", words[2]);
+        }
+
+        [Test]
+        public void SplitWhitespaces_Braces_AsOneWord()
+        {
+            var textReader = new TextReader();
+
+            var words = textReader.SplitWhitespaces("new Contract {Id = new Contract.ContractId{RegistratonNumber = \"п-1\",Version = 1},PurchaseNumber = \"123\"}");
+
+            Assert.AreEqual(3, words.Count);
+            Assert.AreEqual("new", words[0]);
+            Assert.AreEqual("Contract", words[1]);
+            Assert.AreEqual("{Id = new Contract.ContractId{RegistratonNumber = \"п-1\",Version = 1},PurchaseNumber = \"123\"}", words[2]);
         }
     }
 }

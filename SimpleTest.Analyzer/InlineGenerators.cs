@@ -17,8 +17,80 @@ namespace SimpleTest.Analyzer
             Add(Act.Name, new Act());
             Add(Called.Name, new Called());
             Add(Verify.Name, new Verify());
+            Add(New.Name, new New());
+            Add(Provide.Name, new Provide());
+            Add(SetTo.Name, new SetTo());
+            Add(Throws.Name, new Throws());
         }
 
+    }
+
+    public class Throws : IInlineGenerator
+    {
+        public const string Name = "throws";
+
+        public string Generate(Word word)
+        {
+            // not valid actually - error?
+            if (word.Next == null)
+                return null;
+
+            word.Next.Processed = true;
+
+            return string.Format(".Throws<{0}>()", word.Next.Text);
+        }
+    }
+
+
+    public class SetTo : IInlineGenerator
+    {
+        public const string Name = "=";
+
+        public string Generate(Word word)
+        {
+            return " = ";
+        }
+    }
+
+    public class Provide : IInlineGenerator
+    {
+        public const string Name = "provide";
+
+        public string Generate(Word word)
+        {
+            // not valid actually - error?
+            if (word.Next == null)
+                return null;
+            if (word.Next.Next == null)
+                return null;
+
+            var what = word.Next;
+            var with = what.Next;
+
+            word.Processed = true;
+            what.Processed = true;
+            with.Processed = true;
+
+            return string.Format("mock.Provide<{0}>({1})", what.Text, with.GetValue());
+        }
+    }
+
+    public class New : IInlineGenerator
+    {
+        public const string Name = "new";
+
+        public string Generate(Word word)
+        {
+            // not valid actually - error?
+            if (word.Next == null)
+                return null;
+
+            var next = word.Next;
+            word.Processed = true;
+            next.Processed = true;
+
+            return string.Format("new {0}()", next.Text);
+        }
     }
 
     public class Mock : IInlineGenerator
@@ -143,19 +215,4 @@ namespace SimpleTest.Analyzer
             return string.Format("Times.{0}", times);
         }
     }
-
-    //    public class New : IInlineGenerator
-    //    {
-    //        public const string Name = "new";
-    //        // new ContractModel()
-    //        public string Generate(WordLine line, Word word)
-    //        {
-    //            // not valid actually - error?
-    //            if (word.Next == null)
-    //                return null;
-    //
-    //            return string.Format("new {0}", word.Next.GetFunction());
-    //        }
-    //    }
-
 }

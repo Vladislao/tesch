@@ -27,7 +27,6 @@ namespace SimpleTest.Analyzer.Tests
         }
 
         [Test]
-        [Ignore]
         public void Generator_Simple2_Generated()
         {
             var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple-2.txt"));
@@ -35,6 +34,21 @@ namespace SimpleTest.Analyzer.Tests
 
             var testFunction = new Generator();
             var generated = testFunction.Generate(file);
+
+            Assert.AreEqual(expected, generated);
+        }
+
+        [Test]
+        public void DefBlock_Body_Generated()
+        {
+            var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple-2.txt"));
+            var expected = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "generators", "def-generated.txt")).Replace("\r", string.Empty);
+            var testFunction = new DefBlock();
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText(file);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks[5]);
 
             Assert.AreEqual(expected, generated);
         }
@@ -185,5 +199,32 @@ namespace SimpleTest.Analyzer.Tests
             Assert.AreEqual("var actor = mock.Create<Sender>();\n\t\t\t\tactor.SendContractToApi(\"string\")", generated);
         }
 
+        [Test]
+        public void New_Class_Generated()
+        {
+            var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple-2.txt"));
+            var testFunction = new New();
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText(file);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks[5].Lines[1].Words[2]);
+
+            Assert.AreEqual("new Mock<IRabbitMqProvider>()", generated);
+        }
+
+        [Test]
+        public void Provide_Object_Generated()
+        {
+            var file = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "files-tst", "simple-2.txt"));
+            var testFunction = new Provide();
+            var textReader = new TextReader();
+
+            var formalizedText = textReader.FormalizeText(file);
+            var dock = textReader.GetBlocks(formalizedText);
+            var generated = testFunction.Generate(dock.Blocks[5].Lines[2].Words[0]);
+
+            Assert.AreEqual("mock.Provide<IFileSystem>(new MockFileSystem())", generated);
+        }
     }
 }

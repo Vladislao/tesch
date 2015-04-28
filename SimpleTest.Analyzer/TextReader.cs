@@ -38,6 +38,25 @@ namespace SimpleTest.Analyzer
         public bool Processed { get; set; }
 
         /// <summary>
+        /// kinda overload for get function - for lazy ctor
+        /// </summary>
+        /// <returns></returns>
+        public string GetNew()
+        {
+            if (string.IsNullOrWhiteSpace(Text))
+                return Text;
+
+            var first = Text.IndexOf('(');
+            if (first == -1)
+            {
+                // in case it is not closed - as is
+                return Text + "()";
+            }
+
+            return GetFunction();
+        }
+
+        /// <summary>
         /// returns word as function
         /// </summary>
         /// <returns></returns>
@@ -49,8 +68,8 @@ namespace SimpleTest.Analyzer
             var first = Text.IndexOf('(');
             if (first == -1)
             {
-                // in case it is not closed - just empty call
-                return Text + "()";
+                // in case it is not closed - as is
+                return Text;
             }
 
             // retrieve params
@@ -70,9 +89,9 @@ namespace SimpleTest.Analyzer
 
                     txt = string.Format("It.IsAny<{0}>()", type);
                 }
-                result.Append(txt + ",");
+                result.Append(txt + ", ");
             }
-            result.Remove(result.Length - 1, 1);
+            result.Remove(result.Length - 2, 2);
             result.Append(')');
 
             return result.ToString();
@@ -94,7 +113,7 @@ namespace SimpleTest.Analyzer
                 return new List<string>();
 
             var inside = Text.Substring(first + 1, last - first - 1);
-            return inside.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            return inside.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
         }
 
         /// <summary>
@@ -106,13 +125,21 @@ namespace SimpleTest.Analyzer
             if (string.IsNullOrWhiteSpace(Text))
                 return Text;
 
-            switch (Text)
+            if (Text == "new" && Next != null)
             {
-                case "new":
-                    return Next != null ? "new " + Next.GetFunction() : string.Empty;
-                default:
-                    return Text;
+                // creating new object
+                Next.Processed = true;
+                if (Next.Next != null && Next.Next.Text.StartsWith("{"))
+                {
+                    // in case we define properties
+                    Next.Next.Processed = true;
+                    return string.Format("new {0} {1}", Next.Text, Next.Next.Text);
+                }
+                // default
+                return "new " + Next.GetNew();
             }
+
+            return Text;
         }
 
         /// <summary>
@@ -143,8 +170,6 @@ namespace SimpleTest.Analyzer
             var newline = 0;
             var brace = 0;
 
-
-            bool parenthesis = false;
             bool quote = false;
 
             var result = new StringBuilder();
@@ -162,14 +187,13 @@ namespace SimpleTest.Analyzer
                 }
 
                 // do not touch braces content
-                if (brace > 0)
+                if (brace > 0 && ch != '{' && ch != '}')
                 {
-                    result.Append(ch);
+                    // oneline it
+                    if (ch != '\t' && ch != '\n')
+                        result.Append(ch);
                     continue;
                 }
-
-                if (parenthesis && char.IsWhiteSpace(ch))
-                    continue;
 
                 // we need only one whitespace between anything
                 if (whitespace > 0 && char.IsWhiteSpace(ch) && ch != '\t' && ch != '\n')
@@ -195,14 +219,23 @@ namespace SimpleTest.Analyzer
                 if (newline > 1 && ch == '\n')
                     continue;
 
+                if (brace == 0 && ch == '{')
+                {
+                    // if brace started - remove all newlines, tabs and whitespaces at end
+                    var c = result.Length - 1;
+                    while (c > 0 && char.IsWhiteSpace(result[c]))
+                    {
+                        result.Remove(c, 1);
+                        c--;
+                    }
+                    result.Append(" ");
+                }
+
                 if (char.IsWhiteSpace(ch) && ch != '\t' && ch != '\n') whitespace++;
                 else whitespace = 0;
 
                 if (ch == '\n') newline++;
                 else newline = 0;
-
-                if (ch == '(') parenthesis = true;
-                if (ch == ')') parenthesis = false;
 
                 if (ch == '\"' && result[result.Length - 1] != '\\') quote = !quote;
 
@@ -314,13 +347,29 @@ namespace SimpleTest.Analyzer
         public List<string> SplitWhitespaces(string text)
         {
             var words = new List<string>();
+            var wordBuilder = new StringBuilder();
+
             var whitespace = false;
             var quote = false;
-            var wordBuilder = new StringBuilder();
+            var parenthesis = false;
+            var brace = 0;
+
             foreach (var ch in text)
             {
                 // dont touch string
                 if (quote && ch != '\"')
+                {
+                    wordBuilder.Append(ch);
+                    continue;
+                }
+                // function params as one word
+                if (parenthesis && ch != ')')
+                {
+                    wordBuilder.Append(ch);
+                    continue;
+                }
+                // text in braces - as one word
+                if (brace > 0 && ch != '}' && ch != '{')
                 {
                     wordBuilder.Append(ch);
                     continue;
@@ -346,7 +395,12 @@ namespace SimpleTest.Analyzer
                     }
                     else
                         quote = !quote;
+                
+                if (ch == '(') parenthesis = true;
+                if (ch == ')') parenthesis = false;
 
+                if (ch == '{') brace++;
+                if (ch == '}') brace = brace > 1 ? brace - 1 : 0;
 
                 wordBuilder.Append(ch);
             }
