@@ -34,17 +34,17 @@ your default pain
 using System;
 using System.Collections.Generic;
 using Autofac.Extras.Moq;
-using Collector223.ApiConnector;
-using Collector223.Core;
-using Collector223.Core.Exceptions;
-using Collector223.Core.Models;
-using Collector223.Parser;
+using Collector.ApiConnector;
+using Collector.Core;
+using Collector.Core.Exceptions;
+using Collector.Core.Models;
+using Collector.Parser;
 using EastpeasyMq;
 using Moq;
 using NUnit.Framework;
 using UpdaterApi.Sender.Models;
 
-namespace Collector223.ApiConnector.Tests
+namespace Collector.ApiConnector.Tests
 {
 	[TestFixture]
 	public class SenderTests
